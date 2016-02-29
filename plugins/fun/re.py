@@ -71,20 +71,15 @@ def match_pattern(string, pattern):
         or pattern.search(string) is not None
 
 
-add_parse_pattern = compile(r'^(.+?)(?: ?)<=>(?: ?)(.+)')
-
-
 def add_regex(string, database):
     response = None
-    match = add_parse_pattern.match(string)
-    if match:
-        pattern, reply = match.groups()
-
+    try:
+        pattern, reply = map(str.strip, string.split('<=>', 1))
         patterns = database.get([])
         patterns.append((compile(pattern, IGNORECASE), reply, {}))
         database.set(patterns)
         response = "Pattern added successfully."
-    else:
+    except ValueError:
         response = "Error: Invalid syntax."
     return response
 
@@ -145,27 +140,25 @@ set_parse_pattern = compile(r'^(.+?)(?: ?)<=>(?: ?)(.+?) (.*)')
 
 def set_attrib(string, database):
     response = None
-    match = set_parse_pattern.match(string)
-
-    if match:
-        query, attrib, val = match.groups()
+    try:
+        query, trailing = map(str.strip, string.split('<=>', 1))
+        try:
+            attrib, val = trailing.split(' ')
+        except ValueError:
+            attrib = trailing
+            val = None
         patterns = database.get([])
-        set = False
+        response = "No patterns matched the given string."
 
         for pattern, reply, extra in patterns:
             if match_pattern(query, pattern):
-                set = True
-                if val != '':
-                    extra[attrib] = val
-                else:
+                response = "Attribute set on matching patterns successfully."
+                if val is None:
                     if attrib in extra:
                         extra.pop(attrib)
+                else:
+                    extra[attrib] = val
         database.set(patterns)
-
-        if set:
-            response = "Attribute set on matching patterns successfully."
-        else:
-            response = "No patterns matched the given string."
-    else:
+    except ValueError:
         response = "Error: Invalid syntax."
     return response
