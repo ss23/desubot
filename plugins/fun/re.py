@@ -135,9 +135,6 @@ def show_triggers(database):
     return responses
 
 
-set_parse_pattern = compile(r'^(.+?)(?: ?)<=>(?: ?)(.+?) (.*)')
-
-
 def set_attrib(string, database):
     response = None
     try:
