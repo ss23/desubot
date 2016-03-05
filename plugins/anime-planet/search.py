@@ -137,7 +137,7 @@ def search_media(term, type, append=''):
         else:
             results = bs.find_all('li', {'class': 'card'}, recursive=True)
             results_cache = [base_url + result.find('a')['href'] + append
-                for result in results]
+                             for result in results]
             return results_cache.pop(0)
 
 
@@ -169,6 +169,6 @@ def search_characters(character):
             return "No results found."
         else:
             results = bs.find_all('td', {'class': 'tableCharInfo'}, recursive=True)
-            results_cache = [base_url + result.find('a')['href'] \
-                for result in results]
+            results_cache = [base_url + result.find('a')['href']
+                             for result in results]
             return results_cache.pop(0)
