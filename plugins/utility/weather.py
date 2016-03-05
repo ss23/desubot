@@ -5,7 +5,6 @@ from requests import get
 def get_weather(query, api_key):
     response = None
 
-    api_key = 'd6581ca607738206'
     weather_url = 'https://api.wunderground.com/api/{}/conditions/bestfct:1/pws:0/q/{}.json'.format(
         api_key, query)
     weather = get(weather_url).json()
