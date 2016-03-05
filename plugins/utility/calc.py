@@ -1,6 +1,6 @@
 from motobot import command
 from requests import get
-from xmltodict import parse
+from untangle import parse
 
 
 @command('calc')
@@ -19,8 +19,8 @@ def get_result(query, api_key):
             'input': query
         }
         response = parse(get(url, params=params).text)
-        result = response['queryresult']['pod']['subpod']['plaintext']
+        result = response.queryresult.pod.subpod.plaintext.cdata
         result = "Calculation Result: {}".format(result)
-    except:
+    except IndexError:
         result = "Error calculating result."
     return result
