@@ -105,7 +105,7 @@ def search_tag(tag, media):
 
     response = get(url)
 
-    if response.url == url:
+    if response.history:
         return "Search results: {}".format(url)
     else:
         return "{} is not a valid tag.".format(' '.join(tag))
@@ -123,11 +123,11 @@ def more_command(bot, context, message, args):
 def search_media(term, type, append=''):
     global results_cache
     results_cache = []
-    url = base_url + '/' + type + '/all?name=' + term.replace(' ', '%20')
+    url = base_url + '/' + type + '/all'
 
-    response = get(url)
+    response = get(url, params={'name': term})
 
-    if response.url != url:
+    if response.history:
         return response.url + append
     else:
         bs = BeautifulSoup(response.text)
@@ -147,7 +147,7 @@ def search_users(user):
 
     response = get(url)
 
-    if response.url.lower() != url:
+    if response.history:
         return "No users found with name '{}'.".format(user)
     else:
         return response.url
@@ -156,11 +156,11 @@ def search_users(user):
 def search_characters(character):
     global results_cache
     results_cache = []
-    url = base_url + '/characters/all?name=' + character.replace(' ', '%20')
+    url = base_url + '/characters/all'
 
-    response = get(url)
+    response = get(url, params={'name': character})
 
-    if response.url != url:
+    if response.history:
         return response.url
     else:
         bs = BeautifulSoup(response.text)
