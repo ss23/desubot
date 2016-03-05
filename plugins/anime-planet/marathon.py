@@ -1,8 +1,5 @@
 from motobot import command
 from requests import get
-from bs4 import BeautifulSoup
-from time import time
-from re import sub
 
 
 base_url = 'https://marathon.chalamius.se/'
