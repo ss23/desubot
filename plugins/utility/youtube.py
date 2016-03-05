@@ -1,9 +1,5 @@
 from motobot import match
 from requests import get
-from re import compile
-
-
-pattern = r'((youtube\.com\/watch\?\S*v=)|(youtu\.be/))([a-zA-Z0-9-_]+)'
 
 
 def format_duration(duration):
@@ -27,7 +23,7 @@ def format_duration(duration):
     return time + "{:02d}:{:02d}".format(m, s)
 
 
-@match(pattern)
+@match(r'((youtube\.com\/watch\?\S*v=)|(youtu\.be/))([a-zA-Z0-9-_]+)')
 def youtube_match(bot, context, message, match):
     invalid_channels = ['#animu', '#bakalibre']
     if context.channel in invalid_channels:
