@@ -1,8 +1,5 @@
 from motobot import command
 from requests import get
-from bs4 import BeautifulSoup
-from time import time
-from re import sub
 
 
 base_url = 'https://marathon.chalamius.se/'
@@ -24,7 +21,7 @@ def get_current_marathon():
     response = None
     try:
         url = base_url + 'calendar.json'
-        entries = get(url).json()['items']
+        entries = get(url, timeout=5).json()['items']
         entry = entries[-1]
         response = "Today's marathon ({}) is {} ({}) {}".format(
             entry['name'], entry['date'], entry['url'], entry['note']

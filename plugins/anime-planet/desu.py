@@ -6,18 +6,6 @@ from time import time
 desu_time_guard = {}
 
 
-def can_desu(nick):
-    last_desus = desu_time_guard.get(nick, [0, 0, 0, 0, 0])
-    current_time = time()
-
-    ret = not all(current_time - x <= 5 * 60 for x in last_desus)
-    if ret:
-        last_desus.pop(0)
-        last_desus.append(current_time)
-        desu_time_guard[nick] = last_desus
-    return ret
-
-
 @match(r'^desu( *)$')
 def desu_match(bot, context, message, match):
     if can_desu(context.nick):
@@ -40,6 +28,32 @@ def desu_match(bot, context, message, match):
         return string
     else:
         return "You've desu'd too recently to desu again."
+
+
+def can_desu(nick):
+    last_desus = desu_time_guard.get(nick, [0, 0, 0, 0, 0])
+    current_time = time()
+
+    ret = not all(current_time - x <= 5 * 60 for x in last_desus)
+    if ret:
+        last_desus.pop(0)
+        last_desus.append(current_time)
+        desu_time_guard[nick] = last_desus
+    return ret
+
+
+def update_stats(database, nick, un, number):
+    stats = database.get({})
+    userstats = stats.get(nick, [0, 0, 0])
+
+    userstats[0] += 1
+    if un:
+        userstats[2] += 1
+    else:
+        userstats[1] += number
+
+    stats[nick] = userstats
+    database.set(stats)
 
 
 @match(r'^baka( *)$', level=IRCLevel.op, alt=lambda *x, **xs: Eat)
@@ -109,17 +123,3 @@ def top_desu_command(bot, context, message, args):
             ", ".join(keys.keys()) + '.'
 
     return response, Notice(context.nick)
-
-
-def update_stats(database, nick, un, number):
-    stats = database.get({})
-    userstats = stats.get(nick, [0, 0, 0])
-
-    userstats[0] += 1
-    if un:
-        userstats[2] += 1
-    else:
-        userstats[1] += number
-
-    stats[nick] = userstats
-    database.set(stats)

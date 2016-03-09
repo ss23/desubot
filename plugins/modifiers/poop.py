@@ -29,4 +29,3 @@ def poop(words):
             yield poopkey
         else:
             yield word
-

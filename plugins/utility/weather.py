@@ -5,10 +5,9 @@ from requests import get
 def get_weather(query, api_key):
     response = None
 
-    api_key = 'd6581ca607738206'
     weather_url = 'https://api.wunderground.com/api/{}/conditions/bestfct:1/pws:0/q/{}.json'.format(
-        api_key, query)
-    weather = get(weather_url).json()
+        api_key, query.replace(' ', '+'))
+    weather = get(weather_url, timeout=5).json()
 
     if 'current_observation' in weather:
         weather = weather['current_observation']
@@ -20,13 +19,13 @@ def get_weather(query, api_key):
         humidity = weather['relative_humidity']
         wind_kph = weather['wind_kph']
         wind_mph = weather['wind_mph']
-        
+
         response = "Weather in {}: {}; Temperature: {}C ({}F); Pressure: {}mb; Humidity: {}; Wind: {}kph ({}mph);".format(
             location, type, temp_c, temp_f, pressure, humidity, wind_kph, wind_mph)
 
     elif 'results' in weather['response']:
         q = weather['response']['results'][0]['l'][3:]
-        response = get_weather(q)
+        response = get_weather(q, api_key)
 
     else:
         response = "Error: Unable to find specified location."
@@ -65,7 +64,7 @@ def weather_command(bot, context, message, args):
     try:
         response = silly_response(args[1])
         if response is None:
-            response = get_weather('%20'.join(args[1:]), bot.weather_api_key)
+            response = get_weather(' '.join(args[1:]), bot.weather_api_key)
         response = "{}: {}".format(context.nick, response)
     except IndexError:
         response = "Error: You must supply a search term."
