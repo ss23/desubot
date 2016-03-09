@@ -1,5 +1,5 @@
 from motobot import command, hook, sink, Priority
-from time import strftime, localtime
+from time import strftime, gmtime
 
 
 @command('seen')
@@ -76,4 +76,4 @@ def part_hook(bot, context, message):
 
 
 def get_time():
-    return strftime('%a %b %d %H:%M:%S', localtime())
+    return strftime('%a %b %d %H:%M:%S UTC', gmtime())
