@@ -18,7 +18,7 @@ def get_result(query, api_key):
             'includepodid': 'Result',
             'input': query
         }
-        response = parse(get(url, params=params).text)
+        response = parse(get(url, params=params, timeout=5).text)
         result = response.queryresult.pod.subpod.plaintext.cdata
         result = "Calculation Result: {}".format(result)
     except IndexError:

@@ -109,7 +109,7 @@ def mtag_command(bot, context, message, args):
 def search_tag(tag, type):
     url = base_url + '/' + type + '/tags/' + tag.lower()
 
-    response = get(url)
+    response = get(url, timeout=5)
 
     if len(response.history) > 1:
         return "{} is not a valid tag.".format(tag.replace('-', ' '))
@@ -131,7 +131,7 @@ def search_ap(search_term, type, append=''):
     results_cache = iter(())
     url = base_url + '/' + type + '/all'
 
-    response = get(url, params={'name': search_term})
+    response = get(url, params={'name': search_term}, timeout=5)
 
     if len(response.history) > 1:
         result = response.url + append

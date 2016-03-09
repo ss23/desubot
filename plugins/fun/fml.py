@@ -8,7 +8,7 @@ fml_cache = []
 
 def load_fml():
     url = 'http://www.fmylife.com/random'
-    bs = BeautifulSoup(get(url).text)
+    bs = BeautifulSoup(get(url, timeout=5).text, 'lxml')
 
     for div in bs.find_all('div', {'class', 'article'}, recursive=True):
         fml_cache.append(div.find('p').text)

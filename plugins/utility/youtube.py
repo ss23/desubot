@@ -34,7 +34,7 @@ def youtube_match(bot, context, message, match):
         'part': 'contentDetails,snippet',
         'key': bot.youtube_api_key
     }
-    response = get('https://www.googleapis.com/youtube/v3/videos', params=params)
+    response = get('https://www.googleapis.com/youtube/v3/videos', params=params, timeout=5)
     if response.status_code == 400:
         return "{}: invalid id".format(context.nick)
     video = response.json()['items'][0]

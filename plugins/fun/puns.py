@@ -35,13 +35,13 @@ def pun_joke_command(bot, context, message, arg_match):
 
 def get_pun():
     url = 'http://www.punoftheday.com/cgi-bin/randompun.pl'
-    bs = BeautifulSoup(get(url).text)
+    bs = BeautifulSoup(get(url, timeout=5).text, 'lxml')
     pun = bs.find('p', recursive=True).text
     return pun
 
 
 def get_joke():
     url = 'http://www.rinkworks.com/jokes/random.cgi'
-    bs = BeautifulSoup(get(url).text)
+    bs = BeautifulSoup(get(url, timeout=5).text, 'lxml')
     joke = bs.find_all('ul', recursive=True)[2].text.replace('\n', ' ').strip()
     return joke
