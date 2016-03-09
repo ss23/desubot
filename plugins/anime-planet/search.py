@@ -136,7 +136,7 @@ def search_ap(search_term, type, append=''):
     if len(response.history) > 1:
         result = response.url + append
     else:
-        bs = BeautifulSoup(response.text)
+        bs = BeautifulSoup(response.text, 'lxml')
 
         if bs.find('div', {'class': 'error'}, recursive=True):
             result = "No results found."
