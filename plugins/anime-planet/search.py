@@ -38,10 +38,21 @@ def manga_search_command(bot, context, message, args):
 @command('user')
 def user_search_command(bot, context, message, args):
     """ Search for a user on anime-planet.com. """
+    global results_cache
     query = ' '.join(args[1:])
     if not query:
         query = context.nick
-    return search_format.format(search_ap(query, 'users'))
+
+    url = base_url + '/users/' + query
+    response = get(url, timeout=5)
+
+    if len(response.history) > 1 and response.history[-1].url.lower() != response.url.lower():
+        result = search_ap(query, 'users')
+    else:
+        results_cache = iter(lambda: search_ap(query, 'users'), None)
+        result = response.url.replace('http://', 'https://')
+
+    return search_format.format(result)
 
 
 @command('c')
