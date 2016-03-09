@@ -64,7 +64,7 @@ def weather_command(bot, context, message, args):
     try:
         response = silly_response(args[1])
         if response is None:
-            response = get_weather('%20'.join(args[1:]), bot.weather_api_key)
+            response = get_weather(' '.join(args[1:]), bot.weather_api_key)
         response = "{}: {}".format(context.nick, response)
     except IndexError:
         response = "Error: You must supply a search term."
