@@ -25,7 +25,7 @@ def get_weather(query, api_key):
 
     elif 'results' in weather['response']:
         q = weather['response']['results'][0]['l'][3:]
-        response = get_weather(q)
+        response = get_weather(q, api_key)
 
     else:
         response = "Error: Unable to find specified location."
