@@ -20,8 +20,9 @@ def get_weather(query, api_key):
         wind_kph = weather['wind_kph']
         wind_mph = weather['wind_mph']
 
-        response = "Weather in {}: {}; Temperature: {}C ({}F); Pressure: {}mb; Humidity: {}; Wind: {}kph ({}mph);".format(
-            location, type, temp_c, temp_f, pressure, humidity, wind_kph, wind_mph)
+        response = "Weather in {}: {}; Temperature: {}C ({}F); Pressure: {}mb; " \
+                   "Humidity: {}; Wind: {}kph ({}mph);".format(
+                        location, type, temp_c, temp_f, pressure, humidity, wind_kph, wind_mph)
 
     elif 'results' in weather['response']:
         q = weather['response']['results'][0]['l'][3:]

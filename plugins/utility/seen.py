@@ -8,7 +8,8 @@ def seen_command(bot, context, message, args):
     try:
         query = args[1].lower()
         if query == bot.nick.lower():
-            response = "I have never seen myself; it's too dark in {}'s slave labour camp.".format(context.channel)
+            response = "I have never seen myself; it's too dark in {}'s slave labour camp.".format(
+                context.channel)
         else:
             response = context.database.get({})[(context.channel, query)]
     except IndexError:
