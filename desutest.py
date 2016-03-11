@@ -1,4 +1,4 @@
-from motobot import IRCBot, IRCLevel
+from motobot import IRCBot
 from json import load
 
 
