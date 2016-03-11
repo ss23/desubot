@@ -28,7 +28,9 @@ def stats_command(bot, context, message, args):
 @command('rr')
 def rr_command(bot, context, message, args):
     """ Return the recommendations response. Takes single arg for target. """
-    response = "If you are looking for anime/manga recommendations we have a database created specifically for that! Just visit www.anime-planet.com and let us do the hard work for you! For channel rules, please go to http://bit.ly/1L1tnfV"
+    response = "If you are looking for anime/manga recommendations we have a database created " \
+               "specifically for that! Just visit www.anime-planet.com and let us do the hard " \
+               "work for you! For channel rules, please go to http://bit.ly/1L1tnfV"
 
     if len(args) > 1:
         response = "{}: {}".format(' '.join(args[1:]), response)
@@ -39,7 +41,11 @@ def rr_command(bot, context, message, args):
 @command('mib')
 def mib_command(bot, context, message, args):
     """ Help mibs get a real nick. Takes single arg for target. """
-    response = "To change your nick to something you'd like type: /nick new_name; If you like that name and it is unregistered. To register it use: /ns REGISTER password [email]; More information can be found here: https://wiki.rizon.net/index.php?title=Register_your_nickname;"
+    response = "To change your nick to something you'd like type: /nick new_name; " \
+               "If you like that name and it is unregistered. " \
+               "To register it use: /ns REGISTER password [email]; " \
+               "More information can be found here: " \
+               "https://wiki.rizon.net/index.php?title=Register_your_nickname;"
 
     if len(args) > 1:
         response = "{}: {}".format(' '.join(args[1:]), response)
