@@ -1,5 +1,6 @@
 from motobot import command
 from requests import get
+from itertools import groupby
 
 
 base_url = 'https://marathon.chalamius.se/'
@@ -14,18 +15,33 @@ def marathonlist_command(bot, context, message, args):
 @command('marathon')
 def marathon_command(bot, context, message, args):
     """ Return details of the current show on the marathon list. """
-    return get_current_marathon()
+    return get_current_marathons()
 
 
-def get_current_marathon():
-    response = None
+def get_current_marathons():
     try:
+        response = []
         url = base_url + 'calendar.json'
-        entries = get(url, timeout=5).json()['items']
-        entry = entries[-1]
-        response = "Today's marathon ({}) is {} ({}) {}".format(
-            entry['name'], entry['date'], entry['url'], entry['note']
-        )
+        key = lambda x: x['date']
+        entries = sorted(get(url, timeout=5).json()['items'], key=key)
+
+        for _, group in groupby(entries, key=key):
+            latest_entries = list(group)
+
+        main_picks = []
+        other_picks = []
+        for entry in latest_entries:
+            if entry['note'].lower().startswith('main pick'):
+                main_picks.append(entry)
+            else:
+                other_picks.append(entry)
+
+        for entry in main_picks if main_picks else other_picks:
+            response.append("Today's marathon ({date}) is {name} ({url}) {note}".format(**entry))
+
+        if main_picks and other_picks:
+            response.append(
+                "There are more picks today. Check {} for more details.".format(base_url))
     except IndexError:
         response = "There are currently no marathons active."
     return response
