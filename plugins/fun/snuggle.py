@@ -67,3 +67,13 @@ def purr_match(bot, context, message, match):
 @match(r'\*(?:.+? )(kicks|pokes|hits|bites|pats) desubot')
 def bite_match(bot, context, message, match):
     return 'bites ' + context.nick + (' back' if match.group(1) == 'bites' else ''), Action
+
+
+@match(r'\*(?:.+? )(whips|spanks) desubot')
+def moar_match(bot, context, message, match):
+    return "GIVE ME MOOAAARRRR!!!!!"
+
+
+@match(r'(っ´ω｀)っ desubot')
+def hug_match(bot, context, message, match):
+    return '⊂(´Д`⊂)'
