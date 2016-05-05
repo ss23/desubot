@@ -1,4 +1,4 @@
-from motobot import command
+from motobot import command, strip_control_codes
 from re import compile, IGNORECASE
 
 
@@ -14,7 +14,7 @@ def welcome_command(bot, context, message, args):
         if response is None else remove_pants.sub(r'\1', response)
     response = response if len(args) < 2 \
         else "{}: {}".format(' '.join(args[1:]), response)
-    return response
+    return strip_control_codes(response)
 
 
 @command('stats')
