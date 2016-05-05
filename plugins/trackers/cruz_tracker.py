@@ -1,7 +1,7 @@
 from motobot import command, sink
 
 
-@command('trackcruz')
+@command('trackcruz', hidden=True)
 def trackcruz_command(bot, context, message, args):
     last = context.database.get()
     if last is None:
