@@ -1,37 +1,25 @@
 from motobot import command, sink, Priority, IRCLevel, Notice
 from random import choice
+from collections import defaultdict
 
 
-active_users = {}
+last_blames = defaultdict(lambda: None)
 next_blame = None
-
-
-@sink(priority=Priority.high)
-def blame_sink(bot, context, message):
-    global active_users
-    l = active_users.get(context.channel, [])
-
-    if len(l) < 100:
-        l.append(context.nick)
-    else:
-        l.pop(0)
-        l.append(context.nick)
-
-    active_users[context.channel] = l
 
 
 @command('blame')
 def blame_command(bot, context, message, args):
     """ Blame the person who we all know did it! """
-    global active_users
     global next_blame
-    target = ''
 
-    if next_blame is None:
-        target = choice(active_users.get(context.channel, [context.nick]))
-    else:
+    if next_blame is not None:
         target = next_blame
         next_blame = None
+    elif last_blames[context.channel] is None:
+        target = context.nick
+    else:
+        target = last_blames[context.channel]
+    last_blames[context.channel] = context.nick
 
     return 'It was ' + target + '!'
 
