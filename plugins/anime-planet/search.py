@@ -59,10 +59,8 @@ def manga_search_command(bot, context, message, args):
 def user_search_command(bot, context, message, args):
     """ Search for a user on anime-planet.com. """
     query = ' '.join(args[1:])
-    if query:
-        response = search_format.format(search_ap(query, 'users'))
-    else:
-        response = "Please supply a search term."
+    query = query if query else context.nick
+    response = search_format.format(search_ap(query, 'users'))
     return response
 
 
