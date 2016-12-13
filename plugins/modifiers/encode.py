@@ -1,6 +1,6 @@
 from motobot import command, Notice, split_response
 from codecs import encode
-from base64 import b64encode
+from base64 import b64encode, b64decode
 from hashlib import new, algorithms_available
 
 
@@ -27,6 +27,11 @@ def rot47_command(bot, context, message, args):
 @command('base64')
 def base64_command(bot, context, message, args):
     return b64encode(bytes(' '.join(args[1:]), encoding)).decode(encoding)
+
+
+@command('base64decode')
+def base64_decode_command(bot, context, message, args):
+    return b64decode(bytes(' '.join(args[1:]), encoding)).decode(encoding)
 
 
 @command('hash')
