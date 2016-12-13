@@ -12,11 +12,11 @@ def desu_match(bot, context, message, match):
         chance = uniform(0, 1)
         number = randint(0, 30)
         string = ''
-        un = chance <= 0.01
+        un = chance <= 0.025
 
         if un:
-            if chance <= 0.01:
-                special_desus = ['omgdesu', 'dechu']
+            if uniform(0, 1) <= 0.2:
+                special_desus = ['omgdesu', 'dechu', 'deshu', 'http://media.japanpowered.com/images/desu-meme.jpg']
                 string = choice(special_desus)
             else:
                 string = 'undesu'
@@ -74,10 +74,8 @@ def desu_command(bot, context, message, args):
     If an argument is given, queries for stats from that user.
     If no argument is given, queries for stats from the requesting user.
     """
-    if len(args) > 1:
-        return user_stats(context.database, ' '.join(args[1:]).strip())
-    else:
-        return user_stats(context.database, context.nick)
+    nick = context.nick if len(args) <= 1 else ' '.join(args[1:]).strip()
+    return user_stats(context.database, nick)
 
 
 def user_stats(database, nick):

@@ -1,18 +1,26 @@
-from motobot import command, sink, Priority, split_response, Notice
+from motobot import command, sink, Priority, split_response, Notice, request
 from collections import defaultdict
 
 
+MAX_LINES = 50
 lines = defaultdict(lambda: [])
 
 
 @sink(priority=Priority.high)
 def last_sink(bot, context, message):
-    global lines
-    max_lines = 25
     lines[context.channel].append((context.nick, message))
 
-    while len(lines[context.channel]) > max_lines:
+    while len(lines[context.channel]) > MAX_LINES:
         lines[context.channel].pop(0)
+
+
+@request('LINES')
+def lines_request(bot, context, channel, start=None, end=None):
+    channel_lines = lines[channel]
+    requested = (channel_lines if start is None else
+                 (channel_lines[start],) if end is None else
+                 channel_lints[start:end])
+    return list(format_lines(requested))
 
 
 def format_lines(l):

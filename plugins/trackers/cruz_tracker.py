@@ -1,7 +1,7 @@
 from motobot import command, sink
 
 
-@command('trackcruz')
+@command('trackcruz', hidden=True)
 def trackcruz_command(bot, context, message, args):
     last = context.database.get()
     if last is None:
@@ -13,8 +13,8 @@ def trackcruz_command(bot, context, message, args):
 
 @sink()
 def trackcruz_sink(bot, context, message):
-    user = 'cruz'
-    host = 'Chiaki.Loves.Marika.Sama'
+    user = 'miqo'
+    host = 'CCAF97C:906D2581:9B0F15FC:IP'
     if test(user, host, context.host):
         context.database.set(context.nick)
 

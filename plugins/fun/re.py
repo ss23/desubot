@@ -1,4 +1,4 @@
-from motobot import command, sink, Notice, Priority, Eat, Action, split_response
+from motobot import command, sink, Notice, IRCLevel, Priority, Eat, Action, split_response
 from random import choice, uniform
 from re import compile, IGNORECASE
 
@@ -36,7 +36,7 @@ def parse_reply(reply, extra, match, nick):
         return reply
 
 
-@command('re', priority=Priority.lower, hidden=True)
+@command('re', level=IRCLevel.master, priority=Priority.lower, hidden=True)
 def regex_command(bot, context, message, args):
     """ Manage regex matches on bot.
 

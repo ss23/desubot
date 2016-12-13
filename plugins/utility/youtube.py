@@ -25,7 +25,7 @@ def format_duration(duration):
 
 @match(r'((youtube\.com\/watch\?\S*v=)|(youtu\.be/))([a-zA-Z0-9-_]+)')
 def youtube_match(bot, context, message, match):
-    invalid_channels = ['#animu', '#bakalibre']
+    invalid_channels = ['#animu', '#bakalibre', '#rpfreee']
     if context.channel in invalid_channels:
         return None
     vid = match.group(4)
@@ -40,6 +40,4 @@ def youtube_match(bot, context, message, match):
     video = response.json()['items'][0]
     title = video['snippet']['title']
     duration = format_duration(video['contentDetails']['duration'])
-    return "{}'s video: {} - {}".format(
-        context.nick, title, duration
-    )
+    return "{}'s video: {} - {}".format(context.nick, title, duration)

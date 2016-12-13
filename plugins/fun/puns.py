@@ -41,7 +41,4 @@ def get_pun():
 
 
 def get_joke():
-    url = 'http://www.rinkworks.com/jokes/random.cgi'
-    bs = BeautifulSoup(get(url, timeout=5).text, 'lxml')
-    joke = bs.find_all('ul', recursive=True)[2].text.replace('\n', ' ').strip()
-    return joke
+    return get_pun()

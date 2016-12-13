@@ -1,13 +1,33 @@
 from motobot import command
-from requests import get
+from cfscrape import create_scraper
 from bs4 import BeautifulSoup
+from requests.exceptions import ReadTimeout
 
 
-base_url = 'https://www.anime-planet.com'
+base_url = 'http://www.anime-planet.com'
 results_cache = iter(())
 search_format = "Search result: {}"
 rec_format = "Recommendations: {}"
 top_format = "Top Anime: {}"
+scraper = None
+
+
+def get(*args, **kwargs):
+    global scraper
+    if scraper is None:
+        scraper = create_scraper()
+    return scraper.get(*args, **kwargs)
+
+
+@command('search')
+def search_command(bot, context, message, args):
+    """ Search for anything on anime-planet.com. """
+    query = ' '.join(args[1:])
+    if query:
+        response = search_format.format(search_ap(query, 'all'))
+    else:
+        response = "Please supply a search term."
+    return response
 
 
 @command('a')
@@ -38,21 +58,10 @@ def manga_search_command(bot, context, message, args):
 @command('user')
 def user_search_command(bot, context, message, args):
     """ Search for a user on anime-planet.com. """
-    global results_cache
     query = ' '.join(args[1:])
-    if not query:
-        query = context.nick
-
-    url = base_url + '/users/' + query
-    response = get(url, timeout=5)
-
-    if len(response.history) > 1 and response.history[-1].url.lower() != response.url.lower():
-        result = search_ap(query, 'users')
-    else:
-        results_cache = iter(lambda: search_ap(query, 'users'), None)
-        result = response.url.replace('http://', 'https://')
-
-    return search_format.format(result)
+    query = query if query else context.nick
+    response = search_format.format(search_ap(query, 'users'))
+    return response
 
 
 @command('c')
@@ -140,29 +149,19 @@ def more_command(bot, context, message, args):
 def search_ap(search_term, type, append=''):
     global results_cache
     results_cache = iter(())
-    url = base_url + '/' + type + '/all'
+    url = base_url + '/search.php'
 
-    response = get(url, params={'name': search_term}, timeout=5)
-
-    if len(response.history) > 1:
-        result = response.url + append
-    else:
+    try:
+        response = get(url, params={'search': search_term}, timeout=5)
         bs = BeautifulSoup(response.text, 'lxml')
+        sections = bs.find_all('section', {'class': type} if type != 'all' else None)
 
-        if bs.find('div', {'class': 'error'}, recursive=True):
-            result = "No results found."
-        else:
-            if type == 'anime' or type == 'manga':
-                results = bs('li', {'class': 'card'})
-            elif type == 'users':
-                results = bs('td', {'class': 'tableUserName'})
-            elif type == 'characters':
-                results = bs('td', {'class': 'tableCharInfo'})
-
-            def parse_card(card):
-                return base_url + card.find('a')['href'] + append
-
-            results_cache = map(parse_card, results)
-            result = next(results_cache)
-
+        cards = sorted(
+            (card for section in sections for card in section.find_all('li', {'class': 'card'})),
+            key=lambda x: search_term.lower() != x.find('h4').text.lower())
+        results_cache = (base_url + card.find('a')['href'] + append for card in cards)
+        result = next(results_cache, None)
+        result = result if result is not None else "No results found."
+    except ReadTimeout:
+        result = "Search request timed out..."
     return result

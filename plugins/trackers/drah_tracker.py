@@ -1,7 +1,7 @@
 from motobot import command, sink
 
 
-@command('trackdrah')
+@command('trackdrah', hidden=True)
 def trackdrah_command(bot, context, message, args):
     last = context.database.get()
     if last is None:
