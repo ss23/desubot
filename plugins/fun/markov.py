@@ -1,7 +1,7 @@
 from motobot import command, sink, Notice
 from random import randint
 from collections import Counter, defaultdict
-from itertools import islice
+from itertools import islice, dropwhile, takewhile
 
 
 class Markov:
@@ -19,7 +19,6 @@ class Markov:
             self.words[words[-1]][None] += 1
 
     def generate(self, root=None):
-        print("Root: ", root)
         def generate_imp():
             cur = self.choose_root(root)
             while cur is not None:
@@ -31,22 +30,31 @@ class Markov:
         if root is None:
             return Markov.weighted_choice(self.word_count)
         else:
-            root = root.lower()
-            words = Counter({word: self.word_count[word] for word in self.word_count if word.lower() == root})
+            root = root_format(root)
+            words = Counter({word: (self.word_count[word] if self.word_count[word] != 0 else 1) for 
+                             word in self.words if root_format(word) == root})
             return Markov.weighted_choice(words)
 
     @staticmethod
     def weighted_choice(counter):
         size = sum(counter.values())
-        print("Size: ", size)
-        print("Counter: ", counter)
         i = randint(0, size-1)
         return next(islice(counter.elements(), i, None))
 
 
+def root_format(s):
+    s = ''.join(dropwhile(lambda c: not c.isalnum(), s[::-1]))
+    s = ''.join(dropwhile(lambda c: not c.isalnum(), s[::-1]))
+    return s.lower()
+
+
 @command('update', hidden=True)
 def update(bot, context, message, args):
-    pass
+    old = context.session.get()
+    new = Markov()
+    new.words = old.words
+    new.word_count = old.word_count
+    context.session.set(new)
 
 
 @sink()
@@ -64,7 +72,10 @@ def mk_command(bot, context, message, args):
         root = args[1:][-1]
     except IndexError:
         root = None
-    response = markov.generate(root)
+    prefix = ' '.join(args[1:-1])
+    if prefix:
+        prefix += ' '
+    response = prefix + markov.generate(root)
     return response
 
 
