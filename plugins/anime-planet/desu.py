@@ -74,10 +74,8 @@ def desu_command(bot, context, message, args):
     If an argument is given, queries for stats from that user.
     If no argument is given, queries for stats from the requesting user.
     """
-    if len(args) > 1:
-        return user_stats(context.database, ' '.join(args[1:]).strip())
-    else:
-        return user_stats(context.database, context.nick)
+    nick = context.nick if len(args) <= 1 else ' '.join(args[1:]).strip()
+    return user_stats(context.database, nick)
 
 
 def user_stats(database, nick):
