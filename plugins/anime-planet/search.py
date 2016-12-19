@@ -2,6 +2,7 @@ from motobot import command
 from cfscrape import create_scraper
 from bs4 import BeautifulSoup
 from requests.exceptions import ReadTimeout
+from random import choice
 from time import time
 
 
@@ -145,7 +146,12 @@ def more_command(bot, context, message, args):
     try:
         return "More results: {}".format(next(results_cache))
     except StopIteration:
-        return "There are no more results."
+        responses = (
+            "There are no more results.",
+            "There ain't no more!",
+            "I'm givin' 'er all she's got captain!",
+        )
+        return choice(responses)
 
 
 def search_ap(search_term, type, append=''):
