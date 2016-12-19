@@ -2,10 +2,12 @@ from motobot import command
 from cfscrape import create_scraper
 from bs4 import BeautifulSoup
 from requests.exceptions import ReadTimeout
+from time import time
 
 
 base_url = 'http://www.anime-planet.com'
 results_cache = iter(())
+last_result = ('', 0)
 search_format = "Search result: {}"
 rec_format = "Recommendations: {}"
 top_format = "Top Anime: {}"
@@ -148,6 +150,7 @@ def more_command(bot, context, message, args):
 
 def search_ap(search_term, type, append=''):
     global results_cache
+    global last_result
     results_cache = iter(())
     url = base_url + '/search.php'
 
@@ -162,6 +165,10 @@ def search_ap(search_term, type, append=''):
         results_cache = (base_url + card.find('a')['href'] + append for card in cards)
         result = next(results_cache, None)
         result = result if result is not None else "No results found."
+        if result == last_result[0] and time() - last_result[1] < 30:
+            raise "Who the fuck cares, I'm not gonna catch this."
+        else:
+            last_result = (result, time())
     except ReadTimeout:
         result = "Search request timed out..."
     return result
