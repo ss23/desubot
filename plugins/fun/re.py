@@ -20,7 +20,7 @@ def regex_sink(bot, context, message):
 def parse_reply(reply, extra, match, nick):
     chance = float(extra.get('chance', 100))
     if chance >= uniform(0, 100):
-        reply = choice(reply.split('|'))
+        reply = choice([s.strip() for s in reply.split('|')])
 
         tokens = [
             ('{nick}', nick)
