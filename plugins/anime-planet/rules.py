@@ -74,6 +74,15 @@ def mib_command(bot, context, message, args):
             "https://wiki.rizon.net/index.php?title=Register_your_nickname")
 
 
+@command('vv')
+@command('vid')
+@targetted
+def vid_command(bot, context, message, args):
+    """ Return the video FAQ response. """
+    return ("Learn more about how to watch anime on Anime-Planet.com: "
+            "http://www.anime-planet.com/forum/threads/how-to-watch-anime-on-anime-planet.323505/")
+
+
 @command('worstcharacterofalltime')
 def sothis_wishes(bot, context, message, args):
     """ Return the worse character of all time. So says sothis. """
