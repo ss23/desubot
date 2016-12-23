@@ -1,5 +1,10 @@
 from motobot import command, hook, sink, Priority
 from time import strftime, gmtime
+from collections import defaultdict
+
+
+def get_data(database):
+    return defaultdict(dict, database.get({}))
 
 
 @command('seen')
@@ -11,7 +16,7 @@ def seen_command(bot, context, message, args):
             response = "I have never seen myself; it's too dark in {}'s slave labour camp.".format(
                 context.channel)
         else:
-            response = context.database.get({})[(context.channel, query)]
+            response = get_data(context.database)[context.channel][query]
     except IndexError:
         response = "I see you!"
     except KeyError:
@@ -23,8 +28,8 @@ def seen_command(bot, context, message, args):
 def seen_sink(bot, context, message):
     msg = "{} was last seen on {} saying \"{}\".".format(
         context.nick, get_time(), message)
-    data = context.database.get({})
-    data[(context.channel, context.nick.lower())] = msg
+    data = get_data(context.database)
+    data[context.channel][context.nick.lower()] = msg
     context.database.set(data)
 
 
@@ -32,27 +37,28 @@ def seen_sink(bot, context, message):
 def join_hook(bot, context, message):
     msg = "{} was last seen on {} joining the channel.".format(
         message.nick, get_time())
-    data = context.database.get({})
-    data[(message.params[0], message.nick.lower())] = msg
+    data = get_data(context.database)
+    data[message.params[0]][message.nick.lower()] = msg
     context.database.set(data)
 
 
 @hook('NICK')
 def nick_hook(bot, context, message):
-    data = context.database.get({})
+    data = get_data(context.database)
 
     msg = "{} was last seen on {} when they changed their nick to {}.".format(
         message.nick, get_time(), message.params[0])
-    for key, val in data.items():
-        if key[1] == message.nick.lower():
-            data[key] = msg
+    for channel, nicks in data.items():
+        for nick in nicks.keys():
+            if nick == message.nick.lower():
+                data[channel][nick] = msg
 
     msg = "{} was last seen on {} when they changed their nick from {}.".format(
         message.params[0], get_time(), message.nick)
-    for key, val in data.items():
-        if key[1] == message.params[0].lower():
-            data[key] = msg
-
+    for channel, nicks in data.items():
+        for nick in nicks.keys():
+            if nick == message.params[0].lower():
+                data[channel][nick] = msg
     context.database.set(data)
 
 
@@ -60,10 +66,11 @@ def nick_hook(bot, context, message):
 def quit_hook(bot, context, message):
     msg = "{} was last seen on {} when they quit.".format(
         message.nick, get_time())
-    data = context.database.get({})
-    for key, val in data.items():
-        if key[1] == message.nick.lower():
-            data[key] = msg
+    data = get_data(context.database)
+    for channel, nicks in data.items():
+        for nick in nicks.keys():
+            if nick == message.nick.lower():
+                data[channel][nick] = msg
     context.database.set(data)
 
 
@@ -71,8 +78,8 @@ def quit_hook(bot, context, message):
 def part_hook(bot, context, message):
     msg = "{} was last seen on {} when they part the channel.".format(
         message.nick, get_time())
-    data = context.database.get({})
-    data[(message.params[0], message.nick.lower())] = msg
+    data = get_data(context.database)
+    data[message.params[0]][message.nick.lower()] = msg
     context.database.set(data)
 
 

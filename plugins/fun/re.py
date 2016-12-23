@@ -1,13 +1,32 @@
-from motobot import command, sink, Notice, IRCLevel, Priority, Eat, Action, split_response
+from motobot import command, sink, Notice, IRCLevel, Priority, Eat, Action, split_response, BotError
 from random import choice, uniform
 from re import compile, IGNORECASE
+
+
+pattern_cache = None
+
+
+def get_patterns(database):
+    global pattern_cache
+    if pattern_cache is None:
+        pattern_cache = [(compile(pattern, IGNORECASE), response, attrib)
+                         for pattern, response, attrib in database.get([])]
+    return pattern_cache
+
+
+def set_patterns(database, patterns):
+    global pattern_cache
+    pattern_cache = patterns
+    data = [(pattern.pattern, response, attrib)
+            for pattern, response, attrib in patterns]
+    database.set(data)
 
 
 @sink(priority=Priority.lowest)
 def regex_sink(bot, context, message):
     responses = []
 
-    for pattern, reply, extra in context.database.get([]):
+    for pattern, reply, extra in get_patterns(context.database):
         match = pattern.search(message)
         if match:
             reply = parse_reply(reply, extra, match, context.nick)
@@ -47,7 +66,10 @@ def regex_command(bot, context, message, args):
     'show' usage: re show [pattern];
     If pattern is not specified, a list of triggers will be returned.
     """
-    arg = args[1].lower()
+    try:
+        arg = args[1].lower()
+    except IndexError:
+        raise BotError("Error: No arguments provided.", Eat, Notice(context.nick))
     if arg == 'add':
         response = add_regex(' '.join(args[2:]), context.database)
     elif arg == 'del' or arg == 'rem':
@@ -75,9 +97,9 @@ def add_regex(string, database):
     response = None
     try:
         pattern, reply = map(str.strip, string.split('<=>', 1))
-        patterns = database.get([])
+        patterns = get_patterns(database)
         patterns.append((compile(pattern, IGNORECASE), reply, {}))
-        database.set(patterns)
+        set_patterns(database, patterns)
         response = "Pattern added successfully."
     except ValueError:
         response = "Error: Invalid syntax."
@@ -87,7 +109,7 @@ def add_regex(string, database):
 def rem_regex(string, database):
     remove = []
     response = "No patterns matched the string."
-    patterns = database.get([])
+    patterns = get_patterns(database)
 
     for pattern, reply, extra in patterns:
         if match_pattern(string, pattern):
@@ -98,7 +120,7 @@ def rem_regex(string, database):
 
     if remove != []:
         response = "Pattern(s) matching the string have been removed."
-        database.set(patterns)
+        set_patterns(database, patterns)
 
     return response
 
@@ -106,7 +128,7 @@ def rem_regex(string, database):
 def show_patterns(database, string):
     responses = []
 
-    for pattern, reply, extra in database.get([]):
+    for pattern, reply, extra in get_patterns(database):
         if match_pattern(string, pattern):
             extras = []
             for x, y in extra.items():
@@ -124,9 +146,9 @@ def show_patterns(database, string):
 
 
 def show_triggers(database):
-    patterns = database.get(None)
+    patterns = get_patterns(database)
 
-    if patterns is None:
+    if not patterns:
         responses = "There are no patterns currently saved."
     else:
         triggers = map(lambda x: x[0].pattern, patterns)
@@ -144,7 +166,7 @@ def set_attrib(string, database):
         except ValueError:
             attrib = trailing
             val = None
-        patterns = database.get([])
+        patterns = get_patterns(database)
         response = "No patterns matched the given string."
 
         for pattern, reply, extra in patterns:
@@ -155,7 +177,7 @@ def set_attrib(string, database):
                         extra.pop(attrib)
                 else:
                     extra[attrib] = val
-        database.set(patterns)
+        set_patterns(database, patterns)
     except ValueError:
         response = "Error: Invalid syntax."
     return response
