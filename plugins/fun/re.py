@@ -1,15 +1,22 @@
-from motobot import command, sink, Notice, IRCLevel, Priority, Eat, Action, split_response
+from motobot import command, sink, Notice, IRCLevel, Priority, Eat, Action, split_response, BotError
 from random import choice, uniform
 from re import compile, IGNORECASE
 
 
+pattern_cache = None
+
+
 def get_patterns(database):
-    patterns = [(compile(pattern, IGNORECASE), response, attrib)
-                for pattern, response, attrib in database.get([])]
-    return patterns
+    global pattern_cache
+    if pattern_cache is None:
+        pattern_cache = [(compile(pattern, IGNORECASE), response, attrib)
+                         for pattern, response, attrib in database.get([])]
+    return pattern_cache
 
 
 def set_patterns(database, patterns):
+    global pattern_cache
+    pattern_cache = patterns
     data = [(pattern.pattern, response, attrib)
             for pattern, response, attrib in patterns]
     database.set(data)
@@ -59,7 +66,10 @@ def regex_command(bot, context, message, args):
     'show' usage: re show [pattern];
     If pattern is not specified, a list of triggers will be returned.
     """
-    arg = args[1].lower()
+    try:
+        arg = args[1].lower()
+    except IndexError:
+        raise BotError("Error: No arguments provided.", Eat, Notice(context.nick))
     if arg == 'add':
         response = add_regex(' '.join(args[2:]), context.database)
     elif arg == 'del' or arg == 'rem':
