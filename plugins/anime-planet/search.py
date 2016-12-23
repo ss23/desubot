@@ -1,4 +1,4 @@
-from motobot import command
+from motobot import command, BotError
 from cfscrape import create_scraper
 from bs4 import BeautifulSoup
 from requests.exceptions import ReadTimeout
@@ -172,7 +172,7 @@ def search_ap(search_term, type, append=''):
         result = next(results_cache, None)
         result = result if result is not None else "No results found."
         if result == last_result[0] and time() - last_result[1] < 30:
-            raise "Who the fuck cares, I'm not gonna catch this."
+            raise BotError()
         else:
             last_result = (result, time())
     except ReadTimeout:
