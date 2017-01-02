@@ -23,4 +23,6 @@ def get_result(query, api_key):
         result = "Calculation Result: {}".format(result)
     except IndexError:
         result = "Error calculating result."
+    except ReadTimeoutError:
+        result = "Request timed out."
     return result
