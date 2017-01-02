@@ -5,9 +5,9 @@ from itertools import islice, dropwhile, takewhile
 
 
 class Markov:
-    def __init__(self):
-        self.words = defaultdict(Counter)
-        self.word_count = Counter()
+    def __init__(self, words=None, word_count=None):
+        self.words = defaultdict(Counter, {} if words is None else {k: Counter(c) for k, c in words.items()})
+        self.word_count = Counter({} if word_count is None else word_count)
 
     def train(self, message):
         words = [word for word in message.split(' ') if word != '']
@@ -42,32 +42,31 @@ class Markov:
         return next(islice(counter.elements(), i, None))
 
 
+def get_markov(database):
+    return Markov(*database.get([{}, {}]))
+
+
+def set_markov(database, markov):
+    database.set([markov.words, markov.word_count])
+
+
 def root_format(s):
     s = ''.join(dropwhile(lambda c: not c.isalnum(), s[::-1]))
     s = ''.join(dropwhile(lambda c: not c.isalnum(), s[::-1]))
     return s.lower()
 
 
-@command('update', hidden=True)
-def update(bot, context, message, args):
-    old = context.session.get()
-    new = Markov()
-    new.words = old.words
-    new.word_count = old.word_count
-    context.session.set(new)
-
-
 @sink()
 def mk_sink(bot, context, message):
     if not message.startswith(bot.command_prefix):
-        markov = context.session.get(Markov())
+        markov = get_markov(context.database)
         markov.train(message)
-        context.session.set(markov)
+        set_markov(context.database, markov)
 
 
 @command('mk', hidden=True)
 def mk_command(bot, context, message, args):
-    markov = context.session.get(Markov())
+    markov = get_markov(context.database)
     try:
         root = args[1:][-1]
     except IndexError:
@@ -81,7 +80,7 @@ def mk_command(bot, context, message, args):
 
 @command('mkcount', hidden=True)
 def mkcount_command(bot, context, message, args):
-    markov = context.session.get(Markov())
+    markov = get_markov(context.database)
     word_count = set()
 
     for word, words in markov.words.items():
