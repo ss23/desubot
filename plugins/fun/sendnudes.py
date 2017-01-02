@@ -18,8 +18,9 @@ def sendnudes_command(bot, context, message, args):
 
 @command('blowload', hidden=True)
 def blow_load_command(bot, context, message, args):
-    context.session.set(None)
-    return "splooges all over {}!".format(context.nick), Action
+    if context.channel != '#anime-planet.com':
+        context.session.set(None)
+        return "splooges all over {}!".format(context.nick), Action
 
 
 def get_nude(api_key, session):
