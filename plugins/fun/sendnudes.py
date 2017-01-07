@@ -8,19 +8,19 @@ from random import shuffle
 @command('sendnude', hidden=True)
 @command('sendnudes', hidden=True)
 def sendnudes_command(bot, context, message, args):
-    if context.channel != '#anime-planet.com':
-        nick = ' '.join(args[1:])
-        if not nick:
-            nick = context.nick
-        link = get_nude(bot.reddit_api_key, context.session)
-        return "{}: {}".format(nick, link)
+    nick = ' '.join(args[1:])
+    if not nick:
+        nick = context.nick
+    link = get_nude(bot.reddit_api_key, context.session)
+    return "{}: {}".format(nick, link)
 
 
 @command('blowload', hidden=True)
 def blow_load_command(bot, context, message, args):
-    if context.channel != '#anime-planet.com':
-        context.session.set(None)
-        return "splooges all over {}!".format(context.nick), Action
+    context.session.set(None)
+    target = ' '.join(args[1:])
+    target = target if target else context.nick
+    return "splooges all over {}!".format(target), Action
 
 
 def get_nude(api_key, session):
