@@ -52,8 +52,8 @@ def chat_sink(bot, context, message):
         chat = get_chat(context.session, context.nick, context.channel)
         if chat is not None:
             response = chat.ask(message)
-            if response.startswith('*') and response.endswith('*'):
-                response = (response.strip('*'), Action)
+            if response.startswith('*') and response.endswith('*.'):
+                response = (response.strip('*.'), Action)
             return response, Eat
 
 
