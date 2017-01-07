@@ -1,4 +1,4 @@
-from motobot import match
+from motobot import match, command
 from requests import get
 
 
@@ -25,14 +25,16 @@ def format_duration(duration):
 
 @match(r'((youtube\.com\/watch\?\S*v=)|(youtu\.be/))([a-zA-Z0-9-_]+)')
 def youtube_match(bot, context, message, match):
-    invalid_channels = ['#animu', '#bakalibre', '#rpfreee']
-    if context.channel in invalid_channels:
-        return None
-    vid = match.group(4)
+    video_link = match.group(4)
+    title, duration = get_video_details(video_link, bot.youtube_api_key)
+    return "{}'s video: {} - {}".format(context.nick, title, duration)
+
+
+def get_video_details(video_id, api_key):
     params = {
-        'id': vid,
+        'id': video_id,
         'part': 'contentDetails,snippet',
-        'key': bot.youtube_api_key
+        'key': api_key
     }
     response = get('https://www.googleapis.com/youtube/v3/videos', params=params, timeout=5)
     if response.status_code == 400:
@@ -40,4 +42,24 @@ def youtube_match(bot, context, message, match):
     video = response.json()['items'][0]
     title = video['snippet']['title']
     duration = format_duration(video['contentDetails']['duration'])
-    return "{}'s video: {} - {}".format(context.nick, title, duration)
+    return title, duration
+
+
+@command('yt')
+@command('youtube')
+def youtube_command(bot, context, message, args):
+    search = ' '.join(args[1:])
+    params = {
+        'part': 'id',
+        'type': 'video',
+        'key': bot.youtube_api_key,
+        'q': search
+    }
+    data = get('https://www.googleapis.com/youtube/v3/search', params=params, timeout=5).json()
+    try:
+        video_id = data['items'][0]['id']['videoId']
+        title, duration = get_video_details(video_id, bot.youtube_api_key)
+        video_link = 'http://www.youtube.com/watch?v={}'.format(video_id)
+        return "{} - {} - {}".format(title, duration, video_link)
+    except IndexError:
+        return "No results found."
