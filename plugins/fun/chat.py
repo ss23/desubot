@@ -95,6 +95,7 @@ def stopchatwith_command(bot, context, message, args):
 
 
 @command('listchat', level=IRCLevel.master)
+@command('chatlist', level=IRCLevel.master)
 def listchat_command(bot, context, message, args):
     chats = context.session.get({})
     if chats:
