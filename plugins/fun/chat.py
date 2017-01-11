@@ -1,5 +1,6 @@
 from motobot import command, sink, Action, Notice, Priority, IRCLevel, Eat, Target, split_response
 from cleverbot import Cleverbot
+from random import normalvariate
 
 
 def begin_chat(session, nick, channel):
@@ -54,7 +55,14 @@ def chat_sink(bot, context, message):
             response = chat.ask(message)
             if response.startswith('*') and response.endswith('*.'):
                 response = (response.strip('*.'), Action)
-            return response, Eat
+            delay = calculate_delay(response)
+            return response, delay, Eat
+
+
+def calculate_delay(message):
+    delay = normalvariate(2, 0.5)
+    print("Delay: ", delay)
+    return delay
 
 
 @command('chatwith', level=IRCLevel.master)
