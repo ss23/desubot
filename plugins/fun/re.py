@@ -37,8 +37,7 @@ def regex_sink(bot, context, message):
 
 
 def parse_reply(reply, extra, match, nick):
-    chance = float(extra.get('chance', 100))
-    if chance >= uniform(0, 100):
+    if will_trigger(extra, nick):
         reply = choice([s.strip() for s in reply.split('|')])
 
         tokens = [
@@ -52,7 +51,14 @@ def parse_reply(reply, extra, match, nick):
 
         if reply.startswith('/me '):
             reply = (reply[4:], Action)
-        return reply
+        return (reply, float(extra.get('delay', 0)))
+
+
+def will_trigger(extra, nick):
+    chance = float(extra.get('chance', 100))
+    nicks = [nick.lower() for nick in extra.get('nick', '').split(' ')]
+    return (nick.lower in nicks if nicks else True and
+            chance >= uniform(0, 100))
 
 
 @command('re', level=IRCLevel.master, priority=Priority.lower, hidden=True)
