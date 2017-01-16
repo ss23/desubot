@@ -1,5 +1,5 @@
 from motobot import command, sink, Notice, IRCLevel, Priority, Eat, Action, split_response, BotError
-from random import choice, uniform
+from random import choice, uniform, randint
 from re import compile, IGNORECASE
 
 
@@ -29,35 +29,59 @@ def regex_sink(bot, context, message):
     for pattern, reply, extra in get_patterns(context.database):
         match = pattern.search(message)
         if match:
-            reply = parse_reply(reply, extra, match, context.nick)
+            reply = parse_reply(reply, extra, match, context.nick, context.channel)
             if reply is not None:
                 responses.append(reply)
 
     return responses
 
 
-def parse_reply(reply, extra, match, nick):
-    if will_trigger(extra, nick):
+def parse_reply(reply, extra, match, nick, channel):
+    if will_trigger(extra, nick, channel):
         reply = choice([s.strip() for s in reply.split('|')])
 
-        tokens = [
-            ('{nick}', nick)
-        ]
+        tokens = (
+            ('{nick}', nick),
+        )
         for token, replace in tokens:
             reply = reply.replace(token, replace)
 
         for i, group in enumerate(match.groups()):
             reply = reply.replace('${}'.format(i), group)
 
+        reply = parse_repeat(reply, extra)
+
         if reply.startswith('/me '):
             reply = (reply[4:], Action)
-        return (reply, float(extra.get('delay', 0)))
+        return (reply, calculate_delay(extra))
 
 
-def will_trigger(extra, nick):
+def parse_repeat(reply, extra):
+    args = extra.get('repeat', '1').split(' ')
+
+    if len(args) == 1:
+        return reply * int(args[0])
+    else:
+        min, max = int(args[0]), int(args[1])
+        return reply * randint(min, max)
+
+
+def calculate_delay(extra):
+    args = extra.get('delay', '0').split(' ')
+
+    if len(args) == 1:
+        return float(args[0])
+    else:
+        min, max = float(args[0]), float(args[1])
+        return uniform(min, max)
+
+
+def will_trigger(extra, nick, channel):
     chance = float(extra.get('chance', 100))
-    nicks = [nick.lower() for nick in extra.get('nick', '').split(' ')]
-    return (nick.lower in nicks if nicks else True and
+    nicks = {nick.lower() for nick in extra.get('nick', '').split(' ') if nick != ''}
+    channels = {chan.lower() for chan in extra.get('channel', '').split(' ') if chan != ''}
+    return (nick.lower() in nicks if nicks else True and
+            channel.lower() in channels if channels else True and
             chance >= uniform(0, 100))
 
 
@@ -168,7 +192,7 @@ def set_attrib(string, database):
     try:
         query, trailing = map(str.strip, string.split('<=>', 1))
         try:
-            attrib, val = trailing.split(' ')
+            attrib, val = trailing.split(' ', 1)
         except ValueError:
             attrib = trailing
             val = None
