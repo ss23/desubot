@@ -21,7 +21,7 @@ def blame_command(bot, context, message, args):
         target = last_blames[context.channel]
     last_blames[context.channel] = context.nick
 
-    return 'It was ' + target + '!'
+    return 'It was newy!'
 
 
 @command('setblame', level=IRCLevel.master)
